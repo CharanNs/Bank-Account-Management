@@ -1,0 +1,372 @@
+#include<iostream>
+#include<conio.h>
+#include<fstream>
+#include<String>
+#include<iomanip>
+#include<time.h>
+#include<stdlib.h>
+#include<windows.h>
+#include<string.h>
+#include<stdio.h>
+
+char gch='a';
+bool ret=true;
+
+using namespace std;
+class ACC
+{
+	public:
+		 long long int accnum;
+		 int pin;
+  	private:
+	char accname[50];
+    int age;
+    char type[20];
+    char phno[10];
+    char add[100];
+    double bal;
+    
+    public:
+    	void createAcc();
+    	void debbal();
+    	void credbal();
+    	void display();
+	  	void modify();
+	  	void displaybal();
+};
+
+
+   
+void account()
+{
+    ACC obj;
+	obj.createAcc();
+	ofstream outFile;
+	outFile.open("AccountList.dat",ios::app|ios::binary);
+	outFile.write((char*) (&obj), sizeof(ACC));
+	outFile.close();	
+}
+
+ void search(int choice)
+{
+	try_again:
+  long long int accno;
+  system("cls");
+  cout<<"\n\n\n\n\t\t\t\tPLEASE ENTER YOUR ACCOUNT NUMBER:";
+  cin>>accno;
+  fstream file_obj;
+  ACC obj;
+  int flag=0;
+  int pos;
+  file_obj.open("AccountList.dat",ios::in|ios::binary|ios::out);
+  file_obj.read((char*)&obj, sizeof(obj));
+   while (!file_obj.eof()) 
+   {
+   	    if(accno==obj.accnum)
+   	    {
+   	    	flag=1;
+   	    	switch(choice)
+   	    	{
+   	    		case 1:
+   	    			obj.debbal();
+   	    			if(ret==true)
+   	    			{
+   	    			pos=(-1)*static_cast<int>(sizeof(ACC));
+			        file_obj.seekp(pos,ios::cur);
+		            file_obj.write(reinterpret_cast<char *> (&obj), sizeof(ACC));
+		        }
+   	    			break;
+   	    		case 2:
+   	    			obj.credbal();
+   	    		    pos=(-1)*static_cast<int>(sizeof(ACC));
+			        file_obj.seekp(pos,ios::cur);
+		            file_obj.write(reinterpret_cast<char *> (&obj), sizeof(ACC));
+   	    			break;
+   	    		case 3:
+   	    			obj.display();
+   	    			break;
+   	    		case 4:
+   	    			obj.modify();
+   	    			if(ret==true)
+   	    			{
+   	    			pos=(-1)*static_cast<int>(sizeof(ACC));
+			        file_obj.seekp(pos,ios::cur);
+		            file_obj.write(reinterpret_cast<char *> (&obj), sizeof(ACC));
+		            }
+   	    			break;
+   	    		case 5:
+   	    			obj.displaybal();
+			   }
+		   }
+       file_obj.read((char*)&obj, sizeof(ACC));
+    }   
+    file_obj.close();
+	if(flag==0)
+	{
+		char ch;
+		cout<<"ACCOUNT NOT FOUND!!";
+		cout<<"PRESS \"*\" to go to main menu"<<endl;
+		cout<<"PRESS \"$\" try again"<<endl;
+		ch=getch();
+		if(ch=='$')
+		{
+		 goto try_again;
+	    }
+		else if(ch=='*')
+		{
+			file_obj.close();
+			system("cls");
+			gch='*';
+		}
+	}
+	    char ch;
+	    cout<<"\nPRESS \"*\" to go to main menu"<<endl;
+	    ch=getch();
+		if(ch=='*')
+		{
+			file_obj.close();
+			system("cls");
+			gch='*';
+		}
+}
+
+ void ACC::createAcc()
+ {
+ 	srand(time(NULL));
+ 	int op;
+ 	system("cls");
+ 	cout<<"*******************ACCOUNT CREATION PORTAL*******************";
+ 	cin.ignore();
+ 	cout<<"\nPLEASE ENTER YOUR NAME:";
+ 	cin.getline(accname,50);
+ 	cout<<"\nENTER YOUR ADDRESS:";
+ 	cin.getline(add,100);
+ 	option:
+ cout<<"ENTER YOUR AGE:";
+ 	cin>>age;
+ 	cout<<"\t1.SAVINGS\n\t2.CURRENT\n";	
+   cout<<"\nSELECT THE TYPE OF ACCOUNT WHCH YOU WANT TO CREATE:";
+ 	cin>>op;
+ 	switch(op)
+ 	{
+ 		case 1:
+ 			strcpy(type,"SAVINGS");
+ 			break;
+ 		case 2:
+ 			strcpy(type,"CURRENT");
+ 			break;
+ 	    default:
+ 	    	cout<<"\nINVALID OPTION";
+ 	    	goto option;
+ 	    	break;
+    }
+    cout<<"ENTER YOUR PHONE NUMBER:";
+	cin>>phno;
+	cout<<"ENTER YOUR SECRET PIN:";
+	cin>>pin;
+	cout<<"ENTER YOUR INITIAL BALANCE:";
+	cin>>bal;
+	accnum=1000000000+(rand()%9000000000);
+	cout<<"YOUR UNIQUE ID IS:"<<accnum;
+	char o;
+	cout<<"PRESS ANY KEY TO EXIT";
+	cout<<"\nPRESS \'*\' to go to main menu;";
+	o=getch();
+	if(o=='*')
+	{
+		gch='*';
+	}
+}
+
+void ACC::credbal()
+{
+	double money;
+	cout<<"ENTER THE AMOUNT WHICH YOU WANT TO CREDIT:";
+	cin>>money;
+	bal=bal+money;
+	cout<<"\nBALANCE UPDATED......";
+	cout<<"REMAINING BALANCE="<<bal;
+	Sleep(5000);
+	
+}
+
+void ACC::debbal()
+{
+	int trypin;
+	cout<<"ENTER YOUR SECRET PIN:";
+	cin>>trypin;
+	if(trypin!=pin)
+	{
+		ret=false;
+		cout<<"YOU HAVE ENTERED WRONG PIN";
+    	cout<<"\nYou will be redirected to mainmenu in 5 seconds..";
+    	Sleep(5000);
+    	return;
+	}
+	double money;
+	cout<<"ENTER THE AMOUNT WHICH YOU WANT TO DEBIT:";
+	cin>>money;
+	bal=bal-money;
+	cout<<"\nBALANCE UPDATED......";
+	cout<<"REMAINING BALANCE="<<bal;
+	
+}
+
+void ACC::modify()
+{
+	int trypin;
+	cout<<"PLEASE ENTER YOUR PIN:";
+	cin>>trypin;
+	if(trypin!=pin)
+    {
+    	ret=false;
+    	cout<<"YOU HAVE ENTERED WRONG PIN";
+    	cout<<"\nYou will be redirected to mainmenu in 5 seconds..";
+    	Sleep(5000);
+    	
+    	return;
+	}
+	char op;
+     ifstream modinfile;
+     char c;
+     modinfile.open("modifymenu.txt",ios::in);
+     modinfile.seekg(0);
+     while(!modinfile.eof())
+     {
+   	   modinfile.get(c);
+   	   cout<<c;
+     }
+     modinfile.close();
+     try1:
+     cout<<"\n\t\t\t\tSELECT  WHAT YOU WANT TO MODIFY IN YOUR ACCOUNT:";
+     op=getche();
+     fflush(stdin);
+     switch(op)
+     {
+     	case '1':
+     		  cout<<"THIS IS YOUR OLD ADDRESS:"<<add;
+     		  cout<<"\nENTER YOUR NEW ADDRESS:";
+     		  cin.getline(add,100);
+     		  break;
+     	case '2':
+     		  cout<<"THIS IS YOUR OLD PHONE NUMBER"<<phno;
+     		  cout<<"\nENTER YOUR NEW PHONE NUMBER:";
+     		  cin>>phno;
+     		  break;
+     	case '3':
+     	      cout<<"THIS IS YOUR NAME:"<<accname;
+     	      cout<<"\n ENTER NEW NAME:";
+     	      cin.getline(accname,50);
+     	      break;
+        case '4':
+               cout<<"THIS IS YOUR PIN:"<<pin;
+     	      cout<<"\n ENTER NEW PIN:";
+     	      cin>>pin;
+     	      break;
+        default:
+        	cout<<"\nINVALID OPTION";
+        	goto try1;
+	  } 
+	  cout<<"RECORD UPDATED....";
+	 	
+}
+
+void ACC::display()
+{
+	cout<<"\nACCOUNT HOLDER NAME:"<<accname;
+	cout<<"\nACCOUNT NUMBER:"<<accnum;
+	cout<<"\nADDRESS:"<<add;
+	cout<<"\nPHONE NUMBER:"<<phno;
+	cout<<"\nAGE:"<<age;
+	cout<<"\nACCOUNT TYPE:"<<type;
+}
+void ACC::displaybal()
+{
+	system("cls");
+	cout<<"YOUR ACCOUNT BALANCE IS:"<<bal;
+}
+
+int main()
+{
+   int op;
+   ifstream ost("bank.txt");
+    char weltext;
+    if(ost.is_open())
+    {
+	   while(!ost.eof())
+       {
+           ost.get(weltext);
+           cout << weltext;
+        }
+    }
+    ost.close();
+     system("COLOR 01");          //TO cReate a colour changing welcome to the user
+    Sleep(800);
+    system("COLOR 02");
+    Sleep(800);
+    system("COLOR 0D");
+    Sleep(800);
+    system("COLOR 0C");
+    Sleep(800);
+    system("COLOR 0A");
+    Sleep(800);
+    system("COLOR 03");
+    Sleep(2000);
+    system("cls");
+   ifstream infile;
+   char c;
+   mainmenu:
+   system("cls");
+   infile.open("mainmenu.txt",ios::in);
+   infile.seekg(0);
+   while(!infile.eof())
+   {
+   	   infile.get(c);
+   	   cout<<c;
+   }
+   infile.close();
+   tryagain:
+   cout<<"\nSelect your option:"<<endl;
+   cin>>op;
+   switch(op)
+   {
+   	   case 1:
+   	    	   account();
+   	    	   break;
+   	   case 2:
+   	   	       search(1);//debit
+   	    	   break;
+   	   case 3:
+   	   	       search(2);//credit
+   	   	       break;
+   	   case 4:
+   	   	       search(3);//display
+   	   	       break;
+   	   case 5:
+   	   	       search(4);//modify
+   	   	       break;
+   	   case 6:
+   	   	       search(5);//displaybal
+   	   	       break;
+   	  
+   	   case 7:
+   	   	      system("cls");
+   	   	      cout<<"THANKS FOR USING CALCULATOR";
+   	   	      exit(0);
+   	   	      break;
+   	   default:
+   	   	   cout<<"\n\nINVALID OPTION:";
+   	   	   goto tryagain;
+   	   	   break;
+	 }  
+	 if(gch=='*')
+	 {  
+	    gch='a';
+	 	goto mainmenu;
+	 }
+	 else if(gch=='$')
+	 {
+	 	exit(0);
+	 }
+	 
+}
